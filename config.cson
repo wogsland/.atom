@@ -16,6 +16,12 @@
   'disabledPackages': [
     'metrics'
   ]
-  'projectHome': '/Users/bradleywogsland/Projects'
-  'linter-phpcs': 'phpExecutablePath': '/usr/bin/php'
-  'linter-jshint': 'jshintExecutablePath': '/usr/local/bin/jshint'
+  'ignoredNames': [
+    '.git'
+    '.svn'
+    '.DS_Store'
+  ]
+'projectHome': '/Users/bradleywogsland/Projects'
+'linter-phpcs': 'phpExecutablePath': '/usr/bin/php'
+'linter-jshint': 'jshintExecutablePath': '/usr/local/bin/jshint'
+'autosave': {}
