@@ -22,6 +22,10 @@
     '.DS_Store'
   ]
 'projectHome': '/Users/bradleywogsland/Projects'
-'linter-phpcs': 'phpExecutablePath': '/usr/bin/php'
-'linter-jshint': 'jshintExecutablePath': '/usr/local/bin/jshint'
+'linter-phpcs':
+  'phpExecutablePath': '/usr/bin/php'
+'linter-jshint':
+  'jshintExecutablePath': '/usr/local/bin/jshint'
 'autosave': {}
+'tree-view':
+  'hideVcsIgnoredFiles': true
