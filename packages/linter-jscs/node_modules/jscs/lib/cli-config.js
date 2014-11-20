@@ -16,7 +16,8 @@ var configs = ['package.json', '.jscsrc', '.jscs.json'];
 function findup(patterns, options, fn) {
     /* jshint -W083 */
 
-    var lastpath, file;
+    var lastpath;
+    var file;
 
     options = Object.create(options || {});
     options.maxDepth = 1;
@@ -46,19 +47,22 @@ exports.getContent = function(config, directory) {
     }
 
     var configPath = path.resolve(directory, config);
+    var ext;
     var content;
 
     config = path.basename(config);
 
     if (fs.existsSync(configPath)) {
-        if (config === '.jscsrc') {
+        ext = path.extname(configPath);
+
+        if (ext === '.js' || ext === '.json') {
+            content = require(configPath);
+        } else {
             content = JSON.parse(
                 stripJSONComments(
                     fs.readFileSync(configPath, 'utf8')
                 )
             );
-        } else {
-            content = require(configPath);
         }
 
         // Adding property via Object.defineProperty makes it
@@ -94,13 +98,19 @@ exports.load = function(config, cwd) {
         return content;
     }
 
-    // Try to load standart configs from home dir
-    directory = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-    for (var i = 0, len = configs.length; i < len; i++) {
-        content = this.getContent(configs[i], directory);
+    // Try to load standard configs from home dir
+    var directoryArr = [process.env.USERPROFILE, process.env.HOMEPATH, process.env.HOME];
+    for (var i = 0, dirLen = directoryArr.length; i < dirLen; i++) {
+        if (!directoryArr[i]) {
+            continue;
+        }
 
-        if (content) {
-            return content;
+        for (var j = 0, len = configs.length; j < len; j++) {
+            content = this.getContent(configs[j], directoryArr[i]);
+
+            if (content) {
+                return content;
+            }
         }
     }
 };

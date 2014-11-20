@@ -1,31 +1,31 @@
-'exception-reporting':
-  'userId': 'd92042ac-d007-9956-fb27-59debd2b80e6'
-'welcome':
-  'showOnStartup': false
-'metrics':
-  'userId': '09f13261ac75c440adcbafbb995b6d88ea8c5468'
-'editor':
-  'fontSize': 12
-  'showIndentGuide': true
-  'showInvisibles': true
-'core':
-  'themes': [
-    'atom-dark-ui'
-    'atom-dark-syntax'
-  ]
-  'disabledPackages': [
-    'metrics'
-  ]
-  'ignoredNames': [
-    '.git'
-    '.svn'
-    '.DS_Store'
-  ]
-'projectHome': '/Users/bradleywogsland/Projects'
-'linter-phpcs':
-  'phpExecutablePath': '/usr/bin/php'
-'linter-jshint':
-  'jshintExecutablePath': '/usr/local/bin/jshint'
-'autosave': {}
-'tree-view':
-  'hideVcsIgnoredFiles': true
+'global':
+  'exception-reporting':
+    'userId': 'd92042ac-d007-9956-fb27-59debd2b80e6'
+  'welcome':
+    'showOnStartup': false
+  'metrics':
+    'userId': '09f13261ac75c440adcbafbb995b6d88ea8c5468'
+  'editor':
+    'fontSize': 12
+    'showIndentGuide': true
+    'showInvisibles': true
+    'invisibles': {}
+  'core':
+    'disabledPackages': [
+      'metrics'
+      'linter-jscs'
+    ]
+    'ignoredNames': [
+      '.git'
+      '.svn'
+      '.DS_Store'
+    ]
+  'projectHome': '/Users/bradleywogsland/Projects'
+  'linter-phpcs':
+    'phpExecutablePath': '/usr/bin/php'
+  'linter-jshint':
+    'jshintExecutablePath': '/usr/local/bin/jshint'
+  'tree-view':
+    'hideVcsIgnoredFiles': true
+  'linter-jscs': {}
+  'linter': {}

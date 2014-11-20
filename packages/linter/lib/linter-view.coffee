@@ -1,12 +1,10 @@
 _ = require 'lodash'
 fs = require 'fs'
 temp = require 'temp'
-{exec, child} = require 'child_process'
+path = require 'path'
+{log, warn} = require './utils'
+rimraf = require 'rimraf'
 
-{XRegExp} = require 'xregexp'
-
-GutterView = require './gutter-view'
-HighlightsView = require './highlights-view'
 
 temp.track()
 
@@ -25,32 +23,31 @@ class LinterView
   #              annotations
   # statusBarView - shared StatusBarView between all linters
   # linters - global linter set to utilize for linting
-  constructor: (editorView, statusBarView, linters) ->
+  constructor: (@editorView, @statusBarView, @inlineView, @linters = []) ->
 
-    @editor = editorView.editor
-    @editorView = editorView
-    @gutterView = new GutterView(editorView)
-    @HighlightsView = new HighlightsView(editorView)
-    @statusBarView = statusBarView
+    @editor = @editorView.getModel()
+    unless @editor?
+      warn "No editor instance on this editorView"
+    @markers = null
 
-    @initLinters(linters)
+    @initLinters(@linters)
 
     @subscriptions.push atom.workspaceView.on 'pane:item-removed', =>
       @statusBarView.hide()
+      @inlineView.hide()
 
     @subscriptions.push atom.workspaceView.on 'pane:active-item-changed', =>
-      @statusBarView.hide()
       if @editor.id is atom.workspace.getActiveEditor()?.id
-        @displayStatusBar()
+        @updateViews()
+      else
+        @statusBarView.hide()
+        @inlineView.hide()
 
     @handleBufferEvents()
     @handleConfigChanges()
 
-    @subscriptions.push @editorView.on 'editor:display-updated', =>
-      @displayGutterMarkers()
-
     @subscriptions.push @editorView.on 'cursor:moved', =>
-      @displayStatusBar()
+      @updateViews()
 
   # Public: Initialize new linters (used on grammar chagne)
   #
@@ -59,11 +56,8 @@ class LinterView
     @linters = []
     grammarName = @editor.getGrammar().scopeName
     for linter in linters
-      sytaxType = {}.toString.call(linter.syntax)
-      if sytaxType is '[object Array]' and
-      grammarName in linter.syntax or
-      sytaxType is '[object String]' and
-      grammarName is linter.syntax
+      if (_.isArray(linter.syntax) and grammarName in linter.syntax or
+          _.isString(linter.syntax) and grammarName is linter.syntax)
         @linters.push(new linter(@editor))
 
   # Internal: register config modifications handlers
@@ -88,17 +82,22 @@ class LinterView
     @subscriptions.push atom.config.observe 'linter.showGutters',
       (showGutters) =>
         @showGutters = showGutters
-        @displayGutterMarkers()
+        @display()
 
     @subscriptions.push atom.config.observe 'linter.showErrorInStatusBar',
       (showMessagesAroundCursor) =>
         @showMessagesAroundCursor = showMessagesAroundCursor
-        @displayStatusBar()
+        @updateViews()
 
-    @subscriptions.push atom.config.observe 'linter.showHightlighting',
-      (showHightlighting) =>
-        @showHightlighting = showHightlighting
-        @displayHighlights()
+    @subscriptions.push atom.config.observe 'linter.showErrorInline',
+      (showErrorInline) =>
+        @showErrorInline = showErrorInline
+        @updateViews()
+
+    @subscriptions.push atom.config.observe 'linter.showHighlighting',
+      (showHighlighting) =>
+        @showHighlighting = showHighlighting
+        @display()
 
   # Internal: register handlers for editor buffer events
   handleBufferEvents: =>
@@ -118,60 +117,89 @@ class LinterView
       if @editor.id is atom.workspace.getActiveEditor()?.id
         @throttledLint() if @lintOnEditorFocus
 
+    atom.workspaceView.command "linter:lint", => @lint()
+
   # Public: lint the current file in the editor using the live buffer
   lint: ->
+    return if @linters.length is 0
     @totalProcessed = 0
     @messages = []
-    @gutterView.clear()
-    @HighlightsView.removeHighlights()
-    if @linters.length > 0
-      temp.open {suffix: @editor.getGrammar().scopeName}, (err, info) =>
-        info.completedLinters = 0
-        fs.write info.fd, @editor.getText(), =>
-          fs.close info.fd, (err) =>
-            for linter in @linters
-              linter.lintFile(info.path, (messages) => @processMessage(messages, info))
+    @destroyMarkers()
+    # create temp dir because some linters are sensitive to file names
+    temp.mkdir
+      prefix: 'AtomLinter'
+      suffix: @editor.getGrammar().scopeName
+    , (err, tmpDir) =>
+      throw err if err?
+      fileName = path.basename @editor.getPath()
+      tempFileInfo =
+        completedLinters: 0
+        path: path.join tmpDir, fileName
+      fs.writeFile tempFileInfo.path, @editor.getText(), (err) =>
+        throw err if err?
+        for linter in @linters
+          linter.lintFile tempFileInfo.path, (messages) =>
+            @processMessage messages, tempFileInfo, linter
+        return
 
   # Internal: Process the messages returned by linters and render them.
   #
   # messages - An array of messages to annotate:
   #           :level  - the annotation error level ('error', 'warning')
   #           :range - The buffer range that the annotation should be placed
-  processMessage: (messages, tempFileInfo) =>
+  processMessage: (messages, tempFileInfo, linter) =>
+    log "linter returned", linter, messages
+
     tempFileInfo.completedLinters++
-    @messages = @messages.concat(messages)
     if tempFileInfo.completedLinters == @linters.length
-      fs.unlink tempFileInfo.path
+      rimraf tempFileInfo.path, (err) ->
+        throw err if err?
+
+    @messages = @messages.concat(messages)
     @display()
+
+  # Internal: Destroy all markers (and associated decorations)
+  destroyMarkers: ->
+    return unless @markers?
+    m.destroy() for m in @markers
+    @markers = null
 
   # Internal: Render all the linter messages
   display: ->
-    @displayGutterMarkers()
+    @destroyMarkers()
 
-    @displayHighlights()
+    if @showGutters or @showHighlighting
+      @markers ?= []
+      for message in @messages
+        klass = if message.level == 'error'
+          'linter-error'
+        else if message.level == 'warning'
+          'linter-warning'
+        continue unless klass?  # skip other messages
 
-    @displayStatusBar()
+        marker = @editor.markBufferRange message.range, invalidate: 'never'
+        @markers.push marker
 
-  # Internal: Render gutter markers
-  displayGutterMarkers: ->
-    if @showGutters
-      @gutterView.render @messages
-    else
-      @gutterView.render []
+        if @showGutters
+          @editor.decorateMarker marker, type: 'gutter', class: klass
 
-  # Internal: Render code highlighting for message ranges
-  displayHighlights: ->
-    if @showHightlighting
-      @HighlightsView.setHighlights(@messages)
-    else
-      @HighlightsView.removeHighlights()
+        if @showHighlighting
+          @editor.decorateMarker marker, type: 'highlight', class: klass
 
-  # Internal: Update the status bar for new messages
-  displayStatusBar: ->
+    @updateViews()
+
+  # Internal: Update the views for new messages
+  updateViews: ->
     if @showMessagesAroundCursor
       @statusBarView.render @messages, @editor
     else
       @statusBarView.render [], @editor
+
+    if @showErrorInline
+      @inlineView.render @messages, @editorView
+    else
+      @inlineView.render [], @editorView
+
 
   # Public: remove this view and unregister all it's subscriptions
   remove: ->
