@@ -1,54 +1,141 @@
 {
   "name": "linter",
-  "main": "./lib/init",
-  "version": "0.7.3",
-  "private": true,
-  "description": "Validates your code using linters.",
+  "main": "./lib/main",
+  "author": {
+    "name": "AtomLinter"
+  },
+  "version": "1.0.6",
+  "description": "A Base Linter with Cow Powers",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AtomLinter/Linter.git"
+    "url": "https://github.com/AtomLinter/Linter"
   },
   "license": "MIT",
+  "scripts": {
+    "lint": "coffeelint lib && eslint lib"
+  },
   "engines": {
-    "atom": ">=0.125.0",
-    "node": ">= 0.10.0"
+    "atom": ">=0.174.0 <2.0.0"
+  },
+  "consumedServices": {
+    "linter": {
+      "versions": {
+        "^1.0.0": "consumeLinter"
+      }
+    },
+    "status-bar": {
+      "versions": {
+        "^1.0.0": "consumeStatusBar"
+      }
+    }
+  },
+  "providedServices": {
+    "linter-plus-self": {
+      "versions": {
+        "0.1.0": "provideLinter"
+      }
+    }
   },
   "dependencies": {
-    "chai": "^1.9.1",
-    "emissary": "^1.0.0",
-    "jshint": "^2.4.4",
-    "lodash": "^2.4.1",
-    "rimraf": "^2.2.8",
-    "shelljs": "^0.2.6",
-    "sinon": "^1.10.0",
-    "temp": "~0.8.0",
-    "xregexp": "2.0.0"
+    "temp": "^0.8.3",
+    "xregexp": "^2.0.0"
   },
-  "devDependencies": {
-    "biscotto": "^2.1.1",
-    "grunt": "^0.4.5",
-    "grunt-coffeelint": "^0.0.10",
-    "grunt-contrib-clean": "^0.5.0",
-    "grunt-contrib-coffee": "^0.10.1",
-    "grunt-contrib-connect": "^0.7.1",
-    "grunt-contrib-watch": "^0.5.3",
-    "grunt-exec": "^0.4.5",
-    "grunt-gh-pages": "^0.9.1",
-    "grunt-lesslint": "^1.1.3",
-    "grunt-lintspaces": "^0.5.1",
-    "load-grunt-tasks": "^0.4.0",
-    "pygments": "^0.2.0"
-  },
-  "readme": "# Linter\n[![Build Status](https://travis-ci.org/AtomLinter/Linter.svg)](https://travis-ci.org/AtomLinter/Linter)\n\nLint your code with ease in [Atom](http://atom.io).\n\n![atom-inline-messages](inline-comments.gif)\n\nThe idea is to stop the linter plugins war, by providing a top level API for linters to parse and display errors in the Atom editor.\n\n## Available linters\n- [linter-php](https://atom.io/packages/linter-php), for PHP using `php -l`\n- [linter-phpcs](https://atom.io/packages/linter-phpcs), for PHP, using `phpc`\n- [linter-phpmd](https://atom.io/packages/linter-phpmd), for PHP, using `phpmd`\n- [linter-pylint](https://atom.io/packages/linter-pylint), for Python, using `pylint`\n- [linter-pyflakes](https://atom.io/packages/linter-pyflakes), for Python, using `pyflakes`\n- [linter-pep8](https://atom.io/packages/linter-pep8), for Python, using `pep8`.\n- [linter-flake8](https://atom.io/packages/linter-flake8), for Python, using `flake8`\n- [linter-pylama](https://atom.io/packages/linter-pylama), for Python, using `pylama`\n- [linter-javac](https://atom.io/packages/linter-javac), for Java, using `javac`\n- [linter-jshint](https://atom.io/packages/linter-jshint), for JavaScript and JSON, using `jshint`\n- [linter-jscs](https://atom.io/packages/linter-jscs), for JavaScript, using `jscs`\n- [linter-jsxhint](https://atom.io/packages/linter-jsxhint), for JSX (React.js), using `jsxhint`\n- [linter-eslint](https://atom.io/packages/linter-eslint), for JavaScript, using `eslint`\n- [linter-scss-lint](https://atom.io/packages/linter-scss-lint), for SASS/SCSS, using `scss-lint`\n- [linter-less](https://atom.io/packages/linter-less), for LESS, using `less`\n- [linter-coffeelint](https://atom.io/packages/linter-coffeelint), for CoffeeScript, using `coffeelint`\n- [linter-csslint](https://atom.io/packages/linter-csslint), for CSS, using `csslint`\n- [linter-rubocop](https://atom.io/packages/linter-rubocop), for Ruby and Ruby on Rails, using `rubocop`\n- [linter-tslint](https://atom.io/packages/linter-tslint), for Typescript, using `tslint`\n- [linter-xmllint](https://atom.io/packages/linter-xmllint), for XML, using `xmllint`\n- [linter-shellcheck](https://atom.io/packages/linter-shellcheck), for Bash, using `shellcheck`\n- [linter-scalac](https://atom.io/packages/linter-scalac), for Scala, using `scalac`\n- [linter-clang](https://atom.io/packages/linter-clang), for C / C++, using `clang`\n- [linter-cpplint](https://atom.io/packages/linter-cpplint), for C++, using `cpplint`\n- [linter-ruby](https://atom.io/packages/linter-ruby), for Ruby, using `ruby -wc`\n- [linter-lua](https://atom.io/packages/linter-lua), for Lua, using `luac -p`\n- [linter-clojure](https://atom.io/packages/linter-clojure), for Clojure, using `clojure`\n- [linter-puppet-lint](https://atom.io/packages/linter-puppet-lint), for Puppet, using `puppet-lint`\n- [linter-js-yaml](https://atom.io/packages/linter-js-yaml), for Yaml, using `js-yaml`\n- [linter-erb](https://atom.io/packages/linter-erb), for .erb files, using `erb -x`\n- [linter-hlint](https://atom.io/packages/linter-hlint), for Haskell files, using `hlint`\n- [linter-tidy](https://atom.io/packages/linter-tidy), for HTML, using `tidy`\n- [linter-htmlhint](https://atom.io/packages/linter-htmlhint), for html, using `htmlhint`\n- [linter-squirrel](https://atom.io/packages/linter-squirrel), for squirrel, using `squirrel-compiler`\n- [linter-codscriptizer](https://atom.io/packages/linter-codscriptizer), for CoDScript, using `codscriptizer -l`\n- [linter-harbour](https://atom.io/packages/linter-harbour), for Harbour, using `harbour`\n- [linter-rust](https://atom.io/packages/linter-rust), for Rust, using `rustc`\n- [linter-dartanalyzer](https://atom.io/packages/linter-dartanalyzer), for Dart using `dartanalyzer`\n\n\n## Features\n\n* **Lint on edit** – Instant error reporting for you! (And it's fast!)\n* **Modular** – You install only the linters you need.\n* **Active** – New linters are out every week.\n\n## Installation\n\n1. `$ apm install linter` – Install the main package.\n2. `$ apm install linter-jshint` – Install the linter you need, here `jshint`.\n\n## Configuration\n\n* **Lint on save** [On / Off] - Lint the file when you save it\n* **Lint on change** [On / Off] - Lint the file as you type\n* **Show highlighting** [On / Off] - Highlight the range of wrong code\n* **Show gutters**: [On / Off] - Show dot in the gutter on line error\n* **Show messages around cursor** [On / Off] - Show error description in the status bar\n* **Show status bar when cursor is in error range** [On / Off] - Either show status bar when the cursor is on the error line, or show it when the cursor is focus the range of wrong code\n* **Show error inline** [On / Off] - Shows the error or warning message next to the code as opposed to in the status bar.\n* **Lint on change interval** [in ms] - Interval between two lints while you are writing code\n\n## Common errors\n\n* `env: node: No such file or directory` – There's a problem with your node path – [check this](http://stackoverflow.com/a/20077620).\n* `spawn ENOENT` or `spawn ENOTDIR` - A linter can't find a path to the executable. Try starting Atom from a shell via `atom` to make sure it gets your `PATH`. See also [#102](https://github.com/AtomLinter/Linter/issues/102), [#150](https://github.com/AtomLinter/Linter/issues/150).\n* Gutters and highlights not working? Make sure you're using the React editor. The [old editor is deprecated](http://blog.atom.io/2014/07/22/default-to-react-editor.html).\n\n## Documentation\nhttp://atomlinter.github.io/Linter/\n\n## Coming soon\n\n- linter-pep257, for python, using `pep257`.\n- linter-rst, for reStructuredText, using `docutils`.\n- linter-phplint, for PHP, using `phplint`.\n- linter-jsl, for JavaScript, using `jsl`.\n- linter-oclitnt, for C / C++ / Objective-C, using `OCLint`.\n\n## Contributing\n\nIf you're going to submit a pull request, please try to follow\n[the official contribution guidelines of Atom](https://atom.io/docs/latest/contributing).\n\nYou need `nodejs` and `grunt-cli` installed before contributing.\nRun `bower install node` then `npm install -g grunt-cli`.\n\nAlso, run `$ grunt dev` before any submission and while developing, it will achieves severals tasks:\n\n* Compile and lint the CoffeeScript files\n* Lint the stylesheets\n* Lint any trailing spaces and ensure new line at end of file\n\nYou can generate the doc with `$ grunt doc`, it will open in your default browser.\n\n## Donation\n[![Share the love!](https://chewbacco-stuff.s3.amazonaws.com/donate.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KXUYS4ARNHCN8)\n[![donate-paypal](https://s3-eu-west-1.amazonaws.com/chewbacco-stuff/donate-paypal.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KXUYS4ARNHCN8)\n",
+  "readme": "# Linter\n\n[![Slack Badge](https://img.shields.io/badge/chat-atom.io%20slack-blue.svg?style=flat-square)](http://atom-slack.herokuapp.com/)\n[![Build Status](https://img.shields.io/travis/AtomLinter/Linter.svg?style=flat-square)](https://travis-ci.org/AtomLinter/Linter)\n[![Plugin installs!](https://img.shields.io/apm/dm/linter.svg?style=flat-square)](https://atom.io/packages/linter)\n[![Package version!](https://img.shields.io/apm/v/linter.svg?style=flat-square)](https://atom.io/packages/linter)\n[![Dependencies!](https://img.shields.io/david/AtomLinter/Linter.svg?style=flat-square)](https://david-dm.org/AtomLinter/linter)\n\n> Lint your code with ease in [Atom Editor](http://atom.io)\n>\n> The idea is to stop the linter plugins war, by providing a top level API for linters to parse and display errors in the Atom editor.\n\n![Preview](http://g.recordit.co/13RfmirPz2.gif)\n\n## How to / Installation\n\nInstall package through Atom or use CLI:\n\n* `$ apm install linter`\n\n## Availables linters\n\n[Full linters list](http://atomlinter.github.io/)\n\n## API Documentation\n\n[Linter API wiki](https://github.com/AtomLinter/Linter/wiki/Linter-API)\n\n## Contribute\n\nStick to imposed codestyle:\n\n* `$ npm i -g coffeelint eslint`\n* `$ npm run lint`\n",
   "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/AtomLinter/Linter/issues"
   },
   "homepage": "https://github.com/AtomLinter/Linter",
-  "_id": "linter@0.7.3",
-  "dist": {
-    "shasum": "7815ea781c4ddac7e7e9ee30388aab396deb0c3b"
-  },
-  "_resolved": "/private/var/folders/x3/jd0g7rzx0svdmtpg6n5pk2mr0000gp/T/d-114921-1152-19ieb7i/package.tgz",
-  "_from": "/private/var/folders/x3/jd0g7rzx0svdmtpg6n5pk2mr0000gp/T/d-114921-1152-19ieb7i/package.tgz"
+  "_id": "linter@1.0.6",
+  "_shasum": "597228a9583abff09817c926b8bd26e6d5a2583e",
+  "_resolved": "file:../d-115526-734-dusm48/package.tgz",
+  "_from": "../d-115526-734-dusm48/package.tgz",
+  "_atomModuleCache": {
+    "version": 1,
+    "dependencies": [
+      {
+        "name": "temp",
+        "version": "0.8.3",
+        "path": "node_modules/temp/lib/temp.js"
+      },
+      {
+        "name": "os-tmpdir",
+        "version": "1.0.1",
+        "path": "node_modules/temp/node_modules/os-tmpdir/index.js"
+      },
+      {
+        "name": "rimraf",
+        "version": "2.2.8",
+        "path": "node_modules/temp/node_modules/rimraf/rimraf.js"
+      },
+      {
+        "name": "xregexp",
+        "version": "2.0.0",
+        "path": "node_modules/xregexp/xregexp-all.js"
+      }
+    ],
+    "extensions": {
+      ".json": [
+        "coffeelint.json",
+        "node_modules/temp/node_modules/os-tmpdir/package.json",
+        "node_modules/temp/node_modules/rimraf/package.json",
+        "node_modules/temp/package.json",
+        "node_modules/xregexp/package.json",
+        "package.json"
+      ],
+      ".coffee": [
+        "lib/commands.coffee",
+        "lib/editor-linter.coffee",
+        "lib/helpers.coffee",
+        "lib/legacy.coffee",
+        "lib/linter-plus.coffee",
+        "lib/linter-views.coffee",
+        "lib/linter.coffee",
+        "lib/main.coffee",
+        "lib/util.coffee",
+        "lib/utils.coffee",
+        "lib/views/message.coffee"
+      ],
+      ".js": [
+        "lib/views/bottom-status.js",
+        "lib/views/bottom-tab.js",
+        "node_modules/temp/examples/grepcount.js",
+        "node_modules/temp/examples/pdfcreator.js",
+        "node_modules/temp/lib/temp.js",
+        "node_modules/temp/no_cleanup.js",
+        "node_modules/temp/no_cleanup_on_exit.js",
+        "node_modules/temp/no_cleanup_on_exit.spec.js",
+        "node_modules/temp/node_modules/os-tmpdir/index.js",
+        "node_modules/temp/node_modules/rimraf/bin.js",
+        "node_modules/temp/node_modules/rimraf/rimraf.js",
+        "node_modules/xregexp/xregexp-all.js"
+      ]
+    },
+    "folders": [
+      {
+        "paths": [
+          "",
+          "lib",
+          "lib/views",
+          "spec"
+        ],
+        "dependencies": {
+          "temp": "^0.8.3",
+          "xregexp": "^2.0.0"
+        }
+      },
+      {
+        "paths": [
+          "node_modules/temp/examples",
+          "node_modules/temp/lib",
+          "node_modules/temp",
+          "node_modules/temp/test"
+        ],
+        "dependencies": {
+          "os-tmpdir": "^1.0.0",
+          "rimraf": "~2.2.6"
+        }
+      }
+    ]
+  }
 }
